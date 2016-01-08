@@ -69,8 +69,16 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        transmit("HTTP/1.0 200 OK\n\n", sock)
-        transmit(CAT, sock)
+        if "~" in parts[1] or "//" in parts[1]:
+            transmit("HTTP/1.0 400 OK Content-Type: text/html\n\n", sock)
+            transmit("I dont know how to handle this request:\n" + request, sock)
+        else:
+            if "favicon" not in parts[1]:
+                transmit("HTTP/1.0 200 OK Content-Type: text/html\n\n", sock)
+                file = open(parts[1].replace("/", ""), "r")
+                html = file.read()
+                file.close()
+                transmit(html, sock)
     else:
         transmit("\nI don't handle this request: {}\n".format(request), sock)
 
